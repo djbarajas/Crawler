@@ -4,14 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.concurrent.*;
+
 
 /**
  * Class responsible for web crawling.  It fetches urls, parses for links and prints
@@ -28,31 +23,12 @@ public class WebCrawler {
     /** the work queue to multithread */
     private final ExecutorService executor;
 
-    /** optional if the user wants to end the crawling early */
-    private int limit;
-
-    /**
-     * Constructor with a limit to set
-     *
-     * @param limit the amount to crawl the webpage
-     */
-    public WebCrawler(int limit) {
-        this();
-        if (limit == -1) {
-            this.limit = Integer.MAX_VALUE;
-        }
-        else {
-            this.limit = limit;
-        }
-    }
-
     /**
      * Constructor
      */
     public WebCrawler() {
         this.visited_urls = new ConcurrentHashMap<>();
         this.executor = Executors.newFixedThreadPool(5);
-        this.limit = 10;
     }
 
     /**
@@ -76,13 +52,9 @@ public class WebCrawler {
                 logger.debug("unable to parse link " + link);
                 continue;
             }
-            StringBuilder builder = new StringBuilder();
-            builder.append(link + System.lineSeparator() + "\t");
-            builder.append(String.join(System.lineSeparator() + "\t", links));
-            String output = builder.toString();
-            System.out.println(output);
+            System.out.println(WebCrawlerUtil.formatOutput(link, links));
             for (String neighbor : links) {
-                if (this.visited_urls.size() < this.limit && !this.visited_urls.containsKey(neighbor)) {
+                if (!this.visited_urls.containsKey(neighbor)) {
                     this.visited_urls.put(neighbor, 1);
                     queue.add(neighbor);
                 }
@@ -97,26 +69,11 @@ public class WebCrawler {
      */
     public void threadedCrawl(String url) {
         this.executor.submit(new Task(url));
-
-        if (this.limit < Integer.MAX_VALUE) {
-            shutdownExecutor();
-        }
     }
 
     /**
-     * Method to shutdown the thread executor
+     * Task class to multithread crawling
      */
-    public void shutdownExecutor() {
-        logger.debug("Shutting down executor.");
-        executor.shutdown();
-        try {
-            executor.awaitTermination(10, TimeUnit.SECONDS);
-        }
-        catch (InterruptedException e) {
-            logger.error("Unable to shutdown executor!");
-        }
-    }
-
     private class Task implements Runnable {
 
         /** the url to fetch */
@@ -129,15 +86,23 @@ public class WebCrawler {
          */
         public Task(String url) {
             this.url = url;
+            logger.debug("Created task for " + url);
         }
 
         @Override
         public void run() {
-//            try {
-//
-//            } catch (IOException e) {
-//                logger.debug("Task for " + this.url + " failed.");
-//            }
+            try {
+                Set<String> urls = WebCrawlerUtil.getLinks(this.url);
+                System.out.println(WebCrawlerUtil.formatOutput(this.url, urls));
+                for (String neighbor : urls) {
+                    if (!visited_urls.containsKey(neighbor)) {
+                        visited_urls.put(neighbor, 1);
+                        executor.submit(new Task(neighbor));
+                    }
+                }
+            } catch (IOException e) {
+                logger.debug("Task for " + this.url + " failed.");
+            }
             logger.debug("Task for " + this.url + " completed.");
         }
     }

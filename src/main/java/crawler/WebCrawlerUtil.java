@@ -56,7 +56,7 @@ public class WebCrawlerUtil {
      * @param url the url of tthe fetched page
      * @return the string of urls on the page
      */
-    public String formatOutput(Set<String> urls, String url) {
+    public static String formatOutput(String url, Set<String> urls) {
         StringBuilder builder = new StringBuilder();
         builder.append(url + System.lineSeparator() + "\t");
         builder.append(String.join(System.lineSeparator() + "\t", urls));
