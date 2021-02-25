@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -13,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Class responsible for multithreading web crawling.  It fetches urls, parses for links and prints
+ * Class responsible for web crawling.  It fetches urls, parses for links and prints
  *
  * @author Daniel Barajas
  * @version Spring 2021
@@ -23,13 +24,9 @@ public class WebCrawler {
     /** the logger to debug */
     private final Logger logger = LogManager.getLogger();
     /** the urls that have been visited */
-    private final Set<String> visited_urls;
+    private final Map<String, Integer> visited_urls;
     /** the work queue to multithread */
     private final ExecutorService executor;
-    /** string pattern, the pattern to find in the string */
-    public static final String TEXT_PATTERN = "(?s)<a[^>]*?href[^>]*?=[^>]*?\"(https?.+?)\".*?>";
-    /** the compiled patter for regular expression finding */
-    public static final Pattern TEXT_REGEX = Pattern.compile(TEXT_PATTERN);
 
     /** optional if the user wants to end the crawling early */
     private int limit;
@@ -53,43 +50,9 @@ public class WebCrawler {
      * Constructor
      */
     public WebCrawler() {
-        this.visited_urls = new HashSet<>();
+        this.visited_urls = new ConcurrentHashMap<>();
         this.executor = Executors.newFixedThreadPool(5);
         this.limit = 10;
-    }
-
-    /**
-     * fetches an html page from a given url
-     *
-     * @param stringUrl the url to connect to
-     * @return the content of the page
-     * @throws IOException if the connection fails
-     */
-    public static String fetchContent(String stringUrl) throws IOException {
-        URL url = new URL(stringUrl);
-        Scanner scanner = new Scanner(url.openStream());
-        StringBuilder builder = new StringBuilder();
-        while(scanner.hasNext()) {
-            builder.append(scanner.next() + System.lineSeparator());
-        }
-        return builder.toString();
-    }
-
-    /**
-     * calls fetch content to get the web page then parses with regular expressions
-     *
-     * @param url the link to fetch page
-     * @return a set of links on the page
-     * @throws IOException if the connection fails
-     */
-    public static Set<String> getLinks(String url) throws IOException {
-        String content = WebCrawler.fetchContent(url);
-        Set<String> links = new HashSet<>();
-        Matcher matcher = TEXT_REGEX.matcher(content);
-        while (matcher.find()) {
-            links.add(matcher.group(1));
-        }
-        return links;
     }
 
     /**
@@ -102,13 +65,13 @@ public class WebCrawler {
 
         Queue<String> queue = new LinkedList<>();
         queue.add(url);
-        this.visited_urls.add(url);
+        this.visited_urls.put(url, 1);
         Set<String> links;
 
         while (!queue.isEmpty()) {
             String link = queue.remove();
             try {
-                links = getLinks(link);
+                links = WebCrawlerUtil.getLinks(link);
             } catch (IOException e) {
                 logger.debug("unable to parse link " + link);
                 continue;
@@ -119,7 +82,8 @@ public class WebCrawler {
             String output = builder.toString();
             System.out.println(output);
             for (String neighbor : links) {
-                if (this.visited_urls.size() < this.limit && this.visited_urls.add(neighbor)) {
+                if (this.visited_urls.size() < this.limit && !this.visited_urls.containsKey(neighbor)) {
+                    this.visited_urls.put(neighbor, 1);
                     queue.add(neighbor);
                 }
             }
@@ -133,7 +97,10 @@ public class WebCrawler {
      */
     public void threadedCrawl(String url) {
         this.executor.submit(new Task(url));
-        shutdownExecutor();
+
+        if (this.limit < Integer.MAX_VALUE) {
+            shutdownExecutor();
+        }
     }
 
     /**
@@ -152,15 +119,26 @@ public class WebCrawler {
 
     private class Task implements Runnable {
 
+        /** the url to fetch */
         private final String url;
 
+        /**
+         * Task for a certain url to fetch child links
+         *
+         * @param url
+         */
         public Task(String url) {
             this.url = url;
         }
 
         @Override
         public void run() {
-
+//            try {
+//
+//            } catch (IOException e) {
+//                logger.debug("Task for " + this.url + " failed.");
+//            }
+            logger.debug("Task for " + this.url + " completed.");
         }
     }
 }
