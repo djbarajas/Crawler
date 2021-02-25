@@ -31,12 +31,31 @@ public class WebCrawler {
     /** the compiled patter for regular expression finding */
     public static final Pattern TEXT_REGEX = Pattern.compile(TEXT_PATTERN);
 
+    /** optional if the user wants to end the crawling early */
+    private int limit;
+
+    /**
+     * Constructor with a limit to set
+     *
+     * @param limit the amount to crawl the webpage
+     */
+    public WebCrawler(int limit) {
+        this();
+        if (limit == -1) {
+            this.limit = Integer.MAX_VALUE;
+        }
+        else {
+            this.limit = limit;
+        }
+    }
+
     /**
      * Constructor
      */
     public WebCrawler() {
         this.visited_urls = new HashSet<>();
         this.executor = Executors.newFixedThreadPool(5);
+        this.limit = 10;
     }
 
     /**
@@ -95,31 +114,16 @@ public class WebCrawler {
                 continue;
             }
             StringBuilder builder = new StringBuilder();
-            builder.append(url + System.lineSeparator() + "\t");
+            builder.append(link + System.lineSeparator() + "\t");
             builder.append(String.join(System.lineSeparator() + "\t", links));
             String output = builder.toString();
             System.out.println(output);
             for (String neighbor : links) {
-                if (this.visited_urls.add(neighbor)) {
+                if (this.visited_urls.size() < this.limit && this.visited_urls.add(neighbor)) {
                     queue.add(neighbor);
                 }
             }
         }
-//        Set<String> links = getLinks(url);
-//        StringBuilder builder = new StringBuilder();
-//        builder.append(url + System.lineSeparator() + "\t");
-//        builder.append(String.join(System.lineSeparator() + "\t", links));
-//        String output = builder.toString();
-//        System.out.println(output);
-//        for (String link : links) {
-//            if (this.visited_urls.add(link)) {
-//                try {
-//                    crawl(link);
-//                } catch (IOException e) {
-//                    continue;
-//                }
-//            }
-//        }
     }
 
     /**
