@@ -1,11 +1,11 @@
+package crawler;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -20,16 +20,14 @@ import java.util.regex.Pattern;
  */
 public class WebCrawler {
 
+    /** the logger to debug */
     private final Logger logger = LogManager.getLogger();
     /** the urls that have been visited */
     private final Set<String> visited_urls;
-
     /** the work queue to multithread */
     private final ExecutorService executor;
-
     /** string pattern, the pattern to find in the string */
     public static final String TEXT_PATTERN = "(?s)<a[^>]*?href[^>]*?=[^>]*?\"(https?.+?)\".*?>";
-
     /** the compiled patter for regular expression finding */
     public static final Pattern TEXT_REGEX = Pattern.compile(TEXT_PATTERN);
 
@@ -81,22 +79,47 @@ public class WebCrawler {
      * @param url the url to crawl
      * @throws IOException if a url can't be parsed
      */
-    public void crawl(String url) throws IOException {
-        Set<String> links = getLinks(url);
-        StringBuilder builder = new StringBuilder();
-        builder.append(url + System.lineSeparator() + "\t");
-        builder.append(String.join(System.lineSeparator() + "\t", links));
-        String output = builder.toString();
-        System.out.println(output);
-        for (String link : links) {
-            if (this.visited_urls.add(link)) {
-                try {
-                    crawl(link);
-                } catch (IOException e) {
-                    continue;
+    public void crawl(String url) {
+
+        Queue<String> queue = new LinkedList<>();
+        queue.add(url);
+        this.visited_urls.add(url);
+        Set<String> links;
+
+        while (!queue.isEmpty()) {
+            String link = queue.remove();
+            try {
+                links = getLinks(link);
+            } catch (IOException e) {
+                logger.debug("unable to parse link " + link);
+                continue;
+            }
+            StringBuilder builder = new StringBuilder();
+            builder.append(url + System.lineSeparator() + "\t");
+            builder.append(String.join(System.lineSeparator() + "\t", links));
+            String output = builder.toString();
+            System.out.println(output);
+            for (String neighbor : links) {
+                if (this.visited_urls.add(neighbor)) {
+                    queue.add(neighbor);
                 }
             }
         }
+//        Set<String> links = getLinks(url);
+//        StringBuilder builder = new StringBuilder();
+//        builder.append(url + System.lineSeparator() + "\t");
+//        builder.append(String.join(System.lineSeparator() + "\t", links));
+//        String output = builder.toString();
+//        System.out.println(output);
+//        for (String link : links) {
+//            if (this.visited_urls.add(link)) {
+//                try {
+//                    crawl(link);
+//                } catch (IOException e) {
+//                    continue;
+//                }
+//            }
+//        }
     }
 
     /**
