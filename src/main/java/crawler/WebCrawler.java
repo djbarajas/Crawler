@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 
 
 /**
- * Class responsible for web crawling.  It fetches urls, parses for links and prints
+ * Class responsible for web crawling.
  *
  * @author Daniel Barajas
  * @version Spring 2021
@@ -41,18 +41,18 @@ public class WebCrawler {
         Queue<String> queue = new LinkedList<>();
         queue.add(url);
         this.visited_urls.put(url, 1);
-        Set<String> links;
+        Set<String> urls;
 
         while (!queue.isEmpty()) {
             String link = queue.remove();
             try {
-                links = WebCrawlerUtil.getLinks(link);
+                urls = WebCrawlerUtil.getLinks(link);
             } catch (IOException e) {
                 logger.debug("unable to parse link " + link);
                 continue;
             }
-            System.out.println(WebCrawlerUtil.formatOutput(link, links));
-            for (String neighbor : links) {
+            System.out.println(WebCrawlerUtil.formatOutput(link, urls));
+            for (String neighbor : urls) {
                 if (!this.visited_urls.containsKey(neighbor)) {
                     this.visited_urls.put(neighbor, 1);
                     queue.add(neighbor);

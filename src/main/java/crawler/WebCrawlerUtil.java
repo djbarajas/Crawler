@@ -8,6 +8,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Class responsible for fetching urls, parsing for links and prints
+ *
+ * @author Daniel Barajas
+ * @version Spring 2021
+ */
 public class WebCrawlerUtil {
 
     /** string pattern, the pattern to find in the string */
@@ -42,12 +48,12 @@ public class WebCrawlerUtil {
      */
     public static Set<String> getLinks(String url) throws IOException {
         String content = fetchContent(url);
-        Set<String> links = new HashSet<>();
+        Set<String> urls = new HashSet<>();
         Matcher matcher = TEXT_REGEX.matcher(content);
         while (matcher.find()) {
-            links.add(matcher.group(1));
+            urls.add(matcher.group(1));
         }
-        return links;
+        return urls;
     }
 
     /**
@@ -59,7 +65,9 @@ public class WebCrawlerUtil {
      */
     public static String formatOutput(String url, Set<String> urls) {
         StringBuilder builder = new StringBuilder();
-        builder.append(url + System.lineSeparator() + "\t");
+        builder.append(url);
+        builder.append(System.lineSeparator());
+        builder.append("\t");
         builder.append(String.join(System.lineSeparator() + "\t", urls));
         return builder.toString();
     }

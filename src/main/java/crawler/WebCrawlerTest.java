@@ -25,4 +25,15 @@ public class WebCrawlerTest {
         Set<String> urls = WebCrawlerUtil.getLinks("http://example.com/");
         Assert.assertTrue(urls.contains("https://www.iana.org/domains/example"));
     }
+
+    /**
+     * This is to make sure the size of the link set is empty for the specific link
+     *
+     * @throws IOException if the fetch failed
+     */
+    @Test
+    public void testEmpty() throws IOException {
+        Set<String> urls = WebCrawlerUtil.getLinks("http://www.africau.edu/images/default/sample.pdf");
+        Assert.assertEquals(0, urls.size());
+    }
 }
