@@ -27,7 +27,8 @@ public class WebCrawlerUtil {
         Scanner scanner = new Scanner(url.openStream());
         StringBuilder builder = new StringBuilder();
         while(scanner.hasNext()) {
-            builder.append(scanner.next() + System.lineSeparator());
+            builder.append(scanner.next());
+            builder.append(System.lineSeparator());
         }
         return builder.toString();
     }

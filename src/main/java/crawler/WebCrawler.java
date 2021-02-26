@@ -32,13 +32,12 @@ public class WebCrawler {
     }
 
     /**
-     * single threaded crawl
+     * single threaded crawl that utilizes the bfs graph algorithm to
+     * traverse links
      *
      * @param url the url to crawl
-     * @throws IOException if a url can't be parsed
      */
     public void crawl(String url) {
-
         Queue<String> queue = new LinkedList<>();
         queue.add(url);
         this.visited_urls.put(url, 1);
@@ -82,7 +81,7 @@ public class WebCrawler {
         /**
          * Task for a certain url to fetch child links
          *
-         * @param url
+         * @param url the url to fetch
          */
         public Task(String url) {
             this.url = url;

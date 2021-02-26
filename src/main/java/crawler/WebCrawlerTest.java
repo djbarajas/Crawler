@@ -23,6 +23,6 @@ public class WebCrawlerTest {
     @Test
     public void testSetContains() throws IOException {
         Set<String> urls = WebCrawlerUtil.getLinks("http://example.com/");
-        Assert.assertEquals(true, urls.contains("https://www.iana.org/domains/example"));
+        Assert.assertTrue(urls.contains("https://www.iana.org/domains/example"));
     }
 }
