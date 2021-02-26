@@ -71,4 +71,19 @@ public class WebCrawlerUtil {
         builder.append(String.join(System.lineSeparator() + "\t", urls));
         return builder.toString();
     }
+
+    /**
+     * Checks if the first command line arg is a valid url by casting
+     *
+     * @param stringUrl the string to test
+     * @return true if is valid url, false otherwise
+     */
+    public static boolean isValidUrl(String stringUrl) {
+        try {
+            URL url = new URL(stringUrl);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
 }

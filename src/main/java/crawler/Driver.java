@@ -1,5 +1,7 @@
 package crawler;
 
+import java.net.URL;
+
 /**
  * Class responsible for testing web crawler.
  *
@@ -14,11 +16,12 @@ public class Driver {
      * @param args the link to crawl
      */
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.out.println("Please input a link to crawl");
-            return;
+        if (args.length > 0 && WebCrawlerUtil.isValidUrl(args[0])) {
+            WebCrawler crawler = new WebCrawler();
+            crawler.threadedCrawl(args[0]);
         }
-        WebCrawler crawler = new WebCrawler();
-        crawler.threadedCrawl(args[0]);
+        else {
+            System.out.println("Please input a valid link to crawl");
+        }
     }
 }
