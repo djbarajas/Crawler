@@ -3,8 +3,8 @@ package crawler;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.util.Set;
 
 /**
  * Class responsible for testing web crawling.
@@ -14,17 +14,15 @@ import java.util.List;
  */
 public class WebCrawlerTest {
 
+    /**
+     * This test checks if the link example.com contains the link specified.
+     * Checks the fetch html page and the parsing with regular expressions
+     *
+     * @throws IOException if the fetch failed
+     */
     @Test
-    public void timingTest() {
-        List<Long> singleThreaded = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            WebCrawler crawler = new WebCrawler(15);
-            long startTime = System.currentTimeMillis();
-            crawler.crawl("https://www.rescale.com/");
-            long totalTime = System.currentTimeMillis() - startTime;
-            singleThreaded.add(totalTime);
-        }
-        System.out.println(singleThreaded.toString());
-        Assert.assertTrue(singleThreaded.size() > 0);
+    public void testSetContains() throws IOException {
+        Set<String> urls = WebCrawlerUtil.getLinks("http://example.com/");
+        Assert.assertEquals(true, urls.contains("https://www.iana.org/domains/example"));
     }
 }
