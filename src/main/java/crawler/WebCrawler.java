@@ -17,7 +17,7 @@ import java.util.concurrent.*;
 public class WebCrawler {
 
     /** the logger to debug */
-    private final Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger(this.getClass());
     /** the urls that have been visited */
     private final Map<String, Integer> visited_urls;
     /** the work queue to multithread */
