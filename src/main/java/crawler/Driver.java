@@ -1,9 +1,5 @@
 package crawler;
 
-import java.net.URL;
-
-import java.util.Arrays;
-
 /**
  * Class responsible for testing web crawler.
  *
