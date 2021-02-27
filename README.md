@@ -12,3 +12,7 @@ Then to test manually:
 ```
 java -cp target/Crawler-1.0-SNAPSHOT-jar-with-dependencies.jar crawler.Driver [ url ]
 ```
+To run test cases:
+```
+mvn clean test
+```
